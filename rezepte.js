@@ -17,6 +17,17 @@
                 und vonClaude: true (dieser Schritt wurde von Claude ergänzt).
     anleitungVonClaude   true, wenn die ganze Anleitung von Claude ergänzt wurde.
 
+  Zeiten und Nährwerte (alle Nährwerte PRO PORTION):
+    arbeitszeit_min   Minuten, in denen man wirklich etwas tut (schneiden, braten …).
+    gesamtzeit_min    Minuten bis zum Essen, inkl. Warten (Marinieren, Ofen, Auftauen …).
+    kcal, protein_g, fett_g, kohlenhydrate_g, ballaststoffe_g
+                      Kalorien und Gramm pro Portion.
+    werte_geschaetzt  true = Zeiten und Nährwerte sind geschätzt (von Claude aus
+                      Zutaten und Mengen berechnet), keine Laborwerte.
+    Hat ein Rezept Varianten, stehen die fünf Nährwerte in JEDER Variante
+    (vollständige Werte für das ganze Gericht in dieser Variante, nicht nur der Zusatz).
+    Die Gesundheitsnote wird NICHT hier eingetragen – die rechnet app.js selbst aus.
+
   So ist eine Zutat aufgebaut:
     { name: "Zwiebel", menge: 1, einheit: "Stück", kategorie: "obst-gemuese", hinweis: "rot" }
     - name:      Gleiche Namen werden auf der Einkaufsliste zusammengezählt.
@@ -38,6 +49,9 @@ window.REZEPTE = [
     id: "pasta-limone",
     name: "Pasta Limone",
     portionen: 4,
+    arbeitszeit_min: 20,
+    gesamtzeit_min: 25,
+    werte_geschaetzt: true,
     zutaten: [
       { name: "Nudeln", menge: 400, einheit: "g", kategorie: "trockenware" },
       { name: "Ricotta", menge: 200, einheit: "g", kategorie: "kuehlregal" },
@@ -53,6 +67,7 @@ window.REZEPTE = [
       {
         id: "garnelen",
         name: "mit Garnelen",
+        kcal: 585, protein_g: 34, fett_g: 17, kohlenhydrate_g: 75, ballaststoffe_g: 4,
         zutaten: [
           { name: "Garnelen", menge: 250, einheit: "g", kategorie: "tiefkuehl" }
         ]
@@ -60,6 +75,7 @@ window.REZEPTE = [
       {
         id: "tomaten",
         name: "mit Tomaten",
+        kcal: 555, protein_g: 24, fett_g: 16, kohlenhydrate_g: 78, ballaststoffe_g: 5,
         zutaten: [
           { name: "Tomaten", menge: 300, einheit: "g", kategorie: "obst-gemuese", hinweis: "frisch" }
         ]
@@ -79,6 +95,10 @@ window.REZEPTE = [
     id: "asia-nudeln",
     name: "Scharfe Asia-Nudeln (veggie)",
     portionen: 2,
+    arbeitszeit_min: 30,
+    gesamtzeit_min: 35,
+    kcal: 565, protein_g: 27, fett_g: 20, kohlenhydrate_g: 69, ballaststoffe_g: 8,
+    werte_geschaetzt: true,
     zutaten: [
       { name: "Eiernudeln", menge: 150, einheit: "g", kategorie: "trockenware", hinweis: "mittlere Freiland-Eiernudeln" },
       { name: "Tofu", menge: 150, einheit: "g", kategorie: "kuehlregal", hinweis: "fest" },
@@ -111,6 +131,10 @@ window.REZEPTE = [
     id: "katsu-tofu",
     name: "Katsu-Style Tofu",
     portionen: 2,
+    arbeitszeit_min: 30,
+    gesamtzeit_min: 105,
+    kcal: 705, protein_g: 27, fett_g: 20, kohlenhydrate_g: 104, ballaststoffe_g: 8,
+    werte_geschaetzt: true,
     zutaten: [
       { name: "Tofu", menge: 225, einheit: "g", kategorie: "kuehlregal", hinweis: "fest" },
       { name: "Miso-Paste", menge: 1, einheit: "EL", kategorie: "kuehlregal", hinweis: "weiß" },
@@ -141,8 +165,12 @@ window.REZEPTE = [
 
   {
     id: "huehnchen-spiesse",
-    name: "Hühnchen-Spieße",
+    name: "Hühnchen-Spieße mit Reis und Tomatensoße",
     portionen: 2,
+    arbeitszeit_min: 30,
+    gesamtzeit_min: 60,
+    kcal: 655, protein_g: 53, fett_g: 15, kohlenhydrate_g: 76, ballaststoffe_g: 6,
+    werte_geschaetzt: true,
     zutaten: [
       { name: "Hähnchenbrustfilet", menge: 2, einheit: "Stück", kategorie: "kuehlregal", hinweis: "ohne Haut, Freilandhaltung" },
       { name: "Naturjoghurt", menge: 70, einheit: "g", kategorie: "kuehlregal" },
@@ -151,10 +179,11 @@ window.REZEPTE = [
       { name: "Zwiebel", menge: 1, einheit: "Stück", kategorie: "obst-gemuese" },
       { name: "Knoblauch", menge: 1, einheit: "Zehe", kategorie: "obst-gemuese" },
       { name: "Ingwer", menge: 1.5, einheit: "cm", kategorie: "obst-gemuese" },
-      { name: "Passata", menge: 30, einheit: "ml", kategorie: "trockenware", hinweis: "passierte Tomaten, für die Tomatensoße" },
-      { name: "Garam Masala", menge: 0.5, einheit: "TL", kategorie: "vorrat" },
-      { name: "Paprikapulver (geräuchert)", menge: 0.25, einheit: "TL", kategorie: "vorrat" },
-      { name: "Kurkuma", menge: 0.25, einheit: "TL", kategorie: "vorrat", hinweis: "gemahlen" },
+      { name: "Basmatireis", menge: 150, einheit: "g", kategorie: "trockenware", hinweis: "Beilage, von Claude ergänzt" },
+      { name: "Passata", menge: 200, einheit: "ml", kategorie: "trockenware", hinweis: "passierte Tomaten, für die Tomatensoße als Beilage" },
+      { name: "Garam Masala", menge: 1, einheit: "TL", kategorie: "vorrat", hinweis: "halb Marinade, halb Soße" },
+      { name: "Paprikapulver (geräuchert)", menge: 0.5, einheit: "TL", kategorie: "vorrat", hinweis: "halb Marinade, halb Soße" },
+      { name: "Kurkuma", menge: 0.5, einheit: "TL", kategorie: "vorrat", hinweis: "gemahlen, halb Marinade, halb Soße" },
       { name: "Currypulver", kategorie: "vorrat" },
       { name: "Olivenöl", kategorie: "vorrat" },
       { name: "Salz", kategorie: "vorrat" },
@@ -163,12 +192,13 @@ window.REZEPTE = [
     ],
     anleitungVonClaude: true,
     anleitung: [
-      { titel: "Marinade anrühren", text: "Knoblauch und Ingwer fein reiben. Mit dem Joghurt, 1 EL Olivenöl, der Hälfte des Garam Masala, dem Paprikapulver, dem Kurkuma und einer Prise Salz verrühren." },
+      { titel: "Marinade anrühren", text: "Knoblauch und Ingwer fein reiben. Mit dem Joghurt, 1 EL Olivenöl, jeweils der Hälfte von Garam Masala, Paprikapulver und Kurkuma und einer Prise Salz verrühren." },
       { titel: "Marinieren", text: "Hähnchen in ca. 3 cm große Würfel schneiden, in der Marinade wenden und mindestens 30 Minuten im Kühlschrank ziehen lassen. Die Holzspieße in der Zeit in Wasser einweichen, damit sie in der Pfanne nicht verbrennen." },
+      { titel: "Reis kochen", text: "Den Basmatireis in einem Sieb kurz abspülen. Mit der doppelten Menge Wasser (ca. 300 ml) und einer Prise Salz aufkochen, dann zugedeckt bei kleiner Hitze ca. 12 Minuten garen und 5 Minuten ohne Hitze nachquellen lassen." },
       { titel: "Spieße stecken", text: "Paprika und Zwiebel in ca. 3 cm große Stücke schneiden. Abwechselnd mit dem Hähnchen auf die Spieße stecken." },
       { titel: "Braten", text: "Etwas Olivenöl in einer großen Pfanne bei mittlerer bis hoher Hitze erhitzen. Die Spieße darin rundherum 10–12 Minuten braten, bis das Hähnchen durchgegart ist (innen nicht mehr rosa)." },
-      { titel: "Tomatensoße", text: "Die Spieße herausnehmen und warm halten. Die Passata in dieselbe Pfanne geben, mit dem restlichen Garam Masala, Currypulver, Paprikapulver, Salz und Pfeffer würzen und 2–3 Minuten köcheln lassen. Bei Bedarf einen Schuss Wasser dazugeben." },
-      { titel: "Servieren", text: "Die Spieße mit der Tomatensoße anrichten." }
+      { titel: "Tomatensoße", text: "Die Spieße herausnehmen und warm halten. Die Passata in dieselbe Pfanne geben, mit dem restlichen Garam Masala, Paprikapulver und Kurkuma sowie etwas Currypulver, Salz und Pfeffer würzen und 5 Minuten köcheln lassen. Bei Bedarf einen Schuss Wasser dazugeben." },
+      { titel: "Servieren", text: "Die Spieße mit dem Reis und der Tomatensoße anrichten." }
     ]
   },
 
@@ -176,6 +206,10 @@ window.REZEPTE = [
     id: "garnelen-nudeln",
     name: "Garnelen-Nudeln mit Tomaten",
     portionen: 2,
+    arbeitszeit_min: 25,
+    gesamtzeit_min: 35,
+    kcal: 605, protein_g: 34, fett_g: 16, kohlenhydrate_g: 76, ballaststoffe_g: 5,
+    werte_geschaetzt: true,
     zutaten: [
       { name: "Nudeln", menge: 200, einheit: "g", kategorie: "trockenware" },
       { name: "Garnelen", menge: 200, einheit: "g", kategorie: "tiefkuehl" },

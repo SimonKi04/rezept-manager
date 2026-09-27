@@ -7,7 +7,7 @@ in rezepte.js, mit der Endung .jpg:
   Pasta Limone                  ->  pasta-limone.jpg
   Scharfe Asia-Nudeln (veggie)  ->  asia-nudeln.jpg
   Katsu-Style Tofu              ->  katsu-tofu.jpg
-  Hühnchen-Spieße               ->  huehnchen-spiesse.jpg
+  Hühnchen-Spieße mit Reis …    ->  huehnchen-spiesse.jpg
   Garnelen-Nudeln mit Tomaten   ->  garnelen-nudeln.jpg
 
 Regeln:

@@ -195,6 +195,108 @@ main {
   box-shadow: var(--schatten);
 }
 
+/* ===== Bedienbereich: Standard-Personenzahl, Suche, Sortierung ===== */
+.bedienung {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.standard-personen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--flaeche);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 10px 12px 10px 16px;
+}
+.standard-titel { flex: 1; font-weight: 600; line-height: 1.3; }
+.standard-titel small { font-weight: 400; color: var(--text-leise); font-size: 0.85rem; }
+.standard-zahl { min-width: 2ch; text-align: center; font-size: 1.3rem; }
+
+.suche-sortierung {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.feld { display: flex; flex-direction: column; gap: 4px; }
+.feld span { font-size: 0.9rem; font-weight: 600; color: var(--text-leise); padding-left: 4px; }
+.feld input,
+.feld select {
+  font: inherit;
+  color: var(--text);
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 2px solid var(--linie);
+  border-radius: 14px;
+  background: var(--flaeche);
+  width: 100%;
+}
+.feld input:focus,
+.feld select:focus { border-color: var(--akzent); outline: none; }
+
+/* ===== Karte: Note, Zeiten, Nährwerte ===== */
+.karte-kopf {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.note {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.note small { font-size: 0.7rem; font-weight: 600; margin-bottom: 2px; }
+.note-1, .note-2 { background: var(--gruen-hell); color: var(--gruen); border-color: var(--gruen); }
+.note-3, .note-4 { background: #fbefc9; color: #8a6412; border-color: #d9a82e; }
+.note-5, .note-6 { background: var(--akzent-hell); color: var(--akzent-dunkel); border-color: var(--akzent); }
+.note[aria-expanded="true"] { box-shadow: var(--schatten); }
+
+.aufschluesselung {
+  background: var(--hintergrund);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+}
+.aufschluesselung p { margin: 0; }
+.aufschluesselung ul { list-style: none; margin: 8px 0; padding: 0; }
+.aufschluesselung li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--linie);
+}
+.aufschluesselung small { color: var(--text-leise); }
+.aufschluesselung .abzug { color: var(--akzent-dunkel); font-weight: 600; white-space: nowrap; }
+.aufschluesselung .passt { color: var(--gruen); white-space: nowrap; }
+
+.kennzahlen {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+}
+.geschaetzt {
+  margin: -6px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-leise);
+  font-style: italic;
+}
+
 /* ===== Einkaufsliste ===== */
 .bereich { margin-bottom: 20px; }
 .bereich h2 {
@@ -366,6 +468,7 @@ dialog::backdrop { background: rgba(40, 25, 15, 0.5); }
 /* ===== Größere Bildschirme (Tablet / PC) ===== */
 @media (min-width: 640px) {
   .karten { grid-template-columns: repeat(2, 1fr); }
+  .suche-sortierung { grid-template-columns: 2fr 1fr; }
   #ansicht-liste { max-width: 640px; margin: 0 auto; }
   .reiter { justify-content: center; }
   .reiter button { flex: 0 1 220px; }

@@ -17,6 +17,33 @@
   <main>
     <section id="ansicht-rezepte" class="ansicht">
       <p class="einleitung">Wähle Rezepte aus und stelle die Portionen ein.</p>
+
+      <div class="bedienung">
+        <div class="standard-personen" role="group" aria-labelledby="standard-titel">
+          <span id="standard-titel" class="standard-titel">Standard-Personenzahl<br><small>gilt für neu ausgewählte Rezepte</small></span>
+          <button type="button" class="rund" id="standard-weniger" aria-label="Eine Person weniger">−</button>
+          <strong id="standard-zahl" class="standard-zahl">2</strong>
+          <button type="button" class="rund" id="standard-mehr" aria-label="Eine Person mehr">+</button>
+        </div>
+        <div class="suche-sortierung">
+          <label class="feld">
+            <span>Suchen</span>
+            <input type="search" id="suche" placeholder="Name oder Zutat, z. B. Tofu" autocomplete="off">
+          </label>
+          <label class="feld">
+            <span>Sortieren nach</span>
+            <select id="sortierung">
+              <option value="">Wie in rezepte.js</option>
+              <option value="arbeitszeit">Arbeitszeit (kürzeste zuerst)</option>
+              <option value="gesamtzeit">Gesamtzeit (kürzeste zuerst)</option>
+              <option value="kcal">Kalorien (wenigste zuerst)</option>
+              <option value="protein">Protein (meiste zuerst)</option>
+              <option value="note">Gesundheitsnote (beste zuerst)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
       <div id="rezept-liste" class="karten"></div>
     </section>
 

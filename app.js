@@ -3,6 +3,29 @@
 (function () {
   // ===== Einstellungen =====
 
+  // Gesundheitsnote (Schulnote 1–6) – hier kannst du alle Regeln anpassen.
+  // So wird gerechnet (immer pro Portion):
+  //   1. Energie aus Protein, Fett und Kohlenhydraten (Gramm x kcalProGramm),
+  //      davon jeweils der Anteil in Prozent an der Summe.
+  //   2. Liegt ein Anteil außerhalb seines Zielbereichs: so viele Punkte, wie er
+  //      in Prozentpunkten von der nächsten Grenze entfernt ist.
+  //   3. Ballaststoffe: je Gramm unter dem Ziel 1 Punkt.
+  //   4. Note = 1 + (alle Punkte / teiler), auf ganze Note gerundet, höchstens schlechtesteNote.
+  const GESUNDHEIT = {
+    kcalProGramm: { protein: 4, fett: 9, kohlenhydrate: 4 },
+    zielbereiche: {                       // Anteil an der Energie in Prozent
+      protein: { von: 20, bis: 30 },
+      fett: { von: 25, bis: 35 },
+      kohlenhydrate: { von: 40, bis: 55 }
+    },
+    ballaststoffZiel_g: 10,               // Gramm pro Portion
+    teiler: 5,
+    schlechtesteNote: 6
+  };
+
+  // Standard-Personenzahl, solange im Browser noch keine eigene gespeichert ist
+  const STANDARD_PERSONEN_VORGABE = 2;
+
   // Reihenfolge der Bereiche auf der Einkaufsliste
   const BEREICHE = [
     { id: 'obst-gemuese', titel: 'Obst & Gemüse' },
@@ -24,6 +47,8 @@
   const BRUECHE = { 0.25: '¼', 0.5: '½', 0.75: '¾' };
 
   const SPEICHER_SCHLUESSEL = 'rezept-manager-v1';
+  // Eigener Schlüssel, damit "Liste zurücksetzen" die Standard-Personenzahl nicht löscht
+  const STANDARD_SCHLUESSEL = 'rezept-manager-standard-personen';
   const MIN_PORTIONEN = 1;
   const MAX_PORTIONEN = 20;
   const PLATZHALTER_BILD = 'bilder/platzhalter.svg';
@@ -95,6 +120,73 @@
   }
 
   let zustand = zustandLaden();
+
+  function standardPersonenLaden() {
+    try {
+      const zahl = Number(localStorage.getItem(STANDARD_SCHLUESSEL));
+      if (zahl) return begrenze(zahl);
+    } catch (e) {
+      // Speicher nicht lesbar – Vorgabe verwenden
+    }
+    return begrenze(STANDARD_PERSONEN_VORGABE);
+  }
+
+  function standardPersonenSpeichern() {
+    try {
+      localStorage.setItem(STANDARD_SCHLUESSEL, String(standardPersonen));
+    } catch (e) {
+      // Speicher nicht verfügbar – gilt dann nur bis zum Neuladen
+    }
+  }
+
+  let standardPersonen = standardPersonenLaden();
+
+  // ===== Nährwerte und Gesundheitsnote (immer pro Portion) =====
+
+  const NAEHRSTOFF_NAMEN = { protein: 'Protein', fett: 'Fett', kohlenhydrate: 'Kohlenhydrate' };
+
+  // Nährwerte des Rezepts bzw. der gewählten Variante (nicht ausgewählt: erste Variante)
+  function naehrwerteFuer(rezept) {
+    const wahl = zustand.auswahl[rezept.id];
+    const varianteId = gueltigeVariante(rezept, wahl ? wahl.variante : null);
+    const variante = (rezept.varianten || []).find(v => v.id === varianteId);
+    const quelle = variante && variante.kcal != null ? variante : rezept;
+    if (quelle.kcal == null) return null;
+    return {
+      kcal: quelle.kcal,
+      protein_g: quelle.protein_g,
+      fett_g: quelle.fett_g,
+      kohlenhydrate_g: quelle.kohlenhydrate_g,
+      ballaststoffe_g: quelle.ballaststoffe_g,
+      variante: variante ? variante.name : null
+    };
+  }
+
+  function gesundheitsnote(werte) {
+    if (!werte) return null;
+    const k = GESUNDHEIT.kcalProGramm;
+    const energie = {
+      protein: (werte.protein_g || 0) * k.protein,
+      fett: (werte.fett_g || 0) * k.fett,
+      kohlenhydrate: (werte.kohlenhydrate_g || 0) * k.kohlenhydrate
+    };
+    const summe = energie.protein + energie.fett + energie.kohlenhydrate;
+    if (!(summe > 0)) return null;
+
+    let punkte = 0;
+    const naehrstoffe = Object.entries(GESUNDHEIT.zielbereiche).map(([schluessel, ziel]) => {
+      const anteil = energie[schluessel] / summe * 100;
+      const abweichung = anteil < ziel.von ? ziel.von - anteil : anteil > ziel.bis ? anteil - ziel.bis : 0;
+      punkte += abweichung;
+      return { name: NAEHRSTOFF_NAMEN[schluessel] || schluessel, anteil, ziel, punkte: abweichung };
+    });
+
+    const ballaststoffPunkte = Math.max(0, GESUNDHEIT.ballaststoffZiel_g - (werte.ballaststoffe_g || 0));
+    punkte += ballaststoffPunkte;
+
+    const note = Math.min(GESUNDHEIT.schlechtesteNote, Math.round(1 + punkte / GESUNDHEIT.teiler));
+    return { note, punkte, naehrstoffe, ballaststoffe: werte.ballaststoffe_g || 0, ballaststoffPunkte };
+  }
 
   // ===== Mengen rechnen und anzeigen =====
 
@@ -191,22 +283,124 @@
   const zuruecksetzenKnopf = document.getElementById('zuruecksetzen');
   const dialog = document.getElementById('rezept-dialog');
   const dialogInhalt = document.getElementById('dialog-inhalt');
+  const suchfeld = document.getElementById('suche');
+  const sortierAuswahl = document.getElementById('sortierung');
+
+  // Bei welchen Rezepten ist die Aufschlüsselung der Note gerade aufgeklappt
+  const offeneNoten = new Set();
+
+  function klein(text) {
+    return String(text).toLocaleLowerCase('de-DE');
+  }
+
+  function passtZurSuche(rezept, suchtext) {
+    if (!suchtext) return true;
+    const alleZutaten = rezept.zutaten.concat(...(rezept.varianten || []).map(v => v.zutaten));
+    const woerter = [rezept.name].concat(
+      alleZutaten.flatMap(z => [z.name, z.oder ? z.oder.name : ''])
+    );
+    return woerter.some(w => klein(w).includes(suchtext));
+  }
+
+  // Sortierschlüssel: kleinere Zahl steht weiter oben
+  const SORTIERUNGEN = {
+    arbeitszeit: r => r.arbeitszeit_min,
+    gesamtzeit: r => r.gesamtzeit_min,
+    kcal: r => (naehrwerteFuer(r) || {}).kcal,
+    protein: r => { const w = naehrwerteFuer(r); return w ? -w.protein_g : null; },
+    note: r => { const n = gesundheitsnote(naehrwerteFuer(r)); return n ? n.punkte : null; }
+  };
+
+  function sortiere(liste, art) {
+    const schluessel = SORTIERUNGEN[art];
+    if (!schluessel) return liste;
+    return liste
+      .map((rezept, stelle) => ({ rezept, stelle, wert: schluessel(rezept) }))
+      .sort((a, b) => {
+        const aFehlt = a.wert == null, bFehlt = b.wert == null;
+        if (aFehlt || bFehlt) return aFehlt - bFehlt || a.stelle - b.stelle; // ohne Wert ans Ende
+        return a.wert - b.wert || a.stelle - b.stelle;
+      })
+      .map(e => e.rezept);
+  }
+
+  function zahl(n, stellen) {
+    return n.toLocaleString('de-DE', { maximumFractionDigits: stellen });
+  }
+
+  function zeitText(minuten) {
+    if (minuten < 60) return minuten + ' Min';
+    const std = Math.floor(minuten / 60), min = minuten % 60;
+    return std + ' Std' + (min ? ' ' + min + ' Min' : '');
+  }
+
+  function kennzahlenHtml(rezept, werte) {
+    const zeiten = [];
+    if (rezept.arbeitszeit_min != null) zeiten.push('ca. ' + zeitText(rezept.arbeitszeit_min) + ' Arbeit');
+    if (rezept.gesamtzeit_min != null) zeiten.push('ca. ' + zeitText(rezept.gesamtzeit_min) + ' gesamt');
+    const zeilen = [];
+    if (zeiten.length) zeilen.push(`<span>⏱ ${esc(zeiten.join(' · '))}</span>`);
+    if (werte) zeilen.push(`<span>🔥 ca. ${zahl(werte.kcal, 0)} kcal pro Portion</span>`);
+    if (!zeilen.length) return '';
+    return `<p class="kennzahlen">${zeilen.join('')}</p>`;
+  }
+
+  function noteKnopfHtml(rezept, bewertung) {
+    if (!bewertung) return '';
+    const offen = offeneNoten.has(rezept.id);
+    return `<button type="button" class="note note-${bewertung.note}" data-aktion="note" data-id="${esc(rezept.id)}"
+      aria-expanded="${offen}" aria-label="Gesundheitsnote ${bewertung.note}, Aufschlüsselung ${offen ? 'zuklappen' : 'anzeigen'}">
+      <small>Note</small>${bewertung.note}</button>`;
+  }
+
+  function aufschluesselungHtml(bewertung) {
+    const zeile = (text, punkte) => `<li><span>${text}</span><span class="${punkte > 0 ? 'abzug' : 'passt'}">${
+      punkte > 0 ? zahl(punkte, 1) + ' Punkte' : '✓ im Ziel'}</span></li>`;
+    return `
+      <div class="aufschluesselung">
+        <p><strong>So entsteht die Note</strong> (pro Portion)</p>
+        <ul>
+          ${bewertung.naehrstoffe.map(n => zeile(
+            `${esc(n.name)}: ${zahl(n.anteil, 0)} % der Energie <small>(Ziel ${n.ziel.von}–${n.ziel.bis} %)</small>`,
+            n.punkte)).join('')}
+          ${zeile(`Ballaststoffe: ${zahl(bewertung.ballaststoffe, 1)} g <small>(Ziel ${GESUNDHEIT.ballaststoffZiel_g} g)</small>`,
+            bewertung.ballaststoffPunkte)}
+        </ul>
+        <p class="rechnung">1 + ${zahl(bewertung.punkte, 1)} Punkte / ${GESUNDHEIT.teiler}
+          = ${zahl(1 + bewertung.punkte / GESUNDHEIT.teiler, 1)} → <strong>Note ${bewertung.note}</strong></p>
+      </div>`;
+  }
 
   function zeigeRezepte() {
     if (rezepte.length === 0) {
       rezeptListe.innerHTML = '<p class="leer">Keine Rezepte gefunden. Prüfe die Datei rezepte.js.</p>';
       return;
     }
-    rezeptListe.innerHTML = rezepte.map(rezept => {
+    const suchtext = klein(suchfeld.value.trim());
+    const sichtbar = sortiere(rezepte.filter(r => passtZurSuche(r, suchtext)), sortierAuswahl.value);
+    if (sichtbar.length === 0) {
+      rezeptListe.innerHTML = `<p class="leer">Kein Rezept passt zu „${esc(suchfeld.value.trim())}“.</p>`;
+      return;
+    }
+    rezeptListe.innerHTML = sichtbar.map(rezept => {
       const wahl = zustand.auswahl[rezept.id];
       const varianten = rezept.varianten || [];
+      const werte = naehrwerteFuer(rezept);
+      const bewertung = gesundheitsnote(werte);
       return `
         <article class="karte${wahl ? ' ausgewaehlt' : ''}">
           <button type="button" class="karte-bild" data-aktion="ansehen" data-id="${esc(rezept.id)}" aria-label="${esc(rezept.name)} ansehen">
             <img src="${esc(bildPfad(rezept))}" alt="" data-bild="${esc(rezept.id)}" loading="lazy">
           </button>
           <div class="karte-inhalt">
-            <h2>${esc(rezept.name)}</h2>
+            <div class="karte-kopf">
+              <h2>${esc(rezept.name)}</h2>
+              ${noteKnopfHtml(rezept, bewertung)}
+            </div>
+            ${bewertung && offeneNoten.has(rezept.id) ? aufschluesselungHtml(bewertung) : ''}
+            ${kennzahlenHtml(rezept, werte)}
+            ${rezept.werte_geschaetzt ? `<p class="geschaetzt">Zeiten und Nährwerte geschätzt${
+              werte && werte.variante ? ' · Nährwerte für „' + esc(werte.variante) + '“' : ''}</p>` : ''}
             <p class="meta">Grundrezept für ${rezept.portionen} Portionen</p>
             ${rezept.anleitungVonClaude ? '<p class="markierung">Anleitung von Claude ergänzt</p>' : ''}
             ${wahl && varianten.length > 0 ? `
@@ -256,9 +450,15 @@
       case 'ansehen':
         oeffneRezept(rezept);
         return;
+      case 'note':
+        if (offeneNoten.has(rezept.id)) offeneNoten.delete(rezept.id);
+        else offeneNoten.add(rezept.id);
+        zeigeRezepte();
+        return;
       case 'auswaehlen':
+        // Neu ausgewählte Rezepte starten mit der Standard-Personenzahl
         if (wahl) delete zustand.auswahl[rezept.id];
-        else zustand.auswahl[rezept.id] = { portionen: rezept.portionen, variante: gueltigeVariante(rezept, null) };
+        else zustand.auswahl[rezept.id] = { portionen: standardPersonen, variante: gueltigeVariante(rezept, null) };
         break;
       case 'mehr':
       case 'weniger':
@@ -389,6 +589,32 @@
   }
 
   reiterKnoepfe.forEach(k => k.addEventListener('click', () => zeigeAnsicht(k.dataset.ansicht)));
+
+  // ===== Suche, Sortierung, Standard-Personenzahl =====
+
+  suchfeld.addEventListener('input', zeigeRezepte);
+  sortierAuswahl.addEventListener('change', zeigeRezepte);
+
+  const standardZahl = document.getElementById('standard-zahl');
+  const standardWeniger = document.getElementById('standard-weniger');
+  const standardMehr = document.getElementById('standard-mehr');
+
+  function zeigeStandardPersonen() {
+    standardZahl.textContent = standardPersonen;
+    standardWeniger.disabled = standardPersonen <= MIN_PORTIONEN;
+    standardMehr.disabled = standardPersonen >= MAX_PORTIONEN;
+  }
+
+  function aendereStandardPersonen(schritt) {
+    // Bereits ausgewählte Rezepte behalten ihre Personenzahl
+    standardPersonen = begrenze(standardPersonen + schritt);
+    standardPersonenSpeichern();
+    zeigeStandardPersonen();
+  }
+
+  standardWeniger.addEventListener('click', () => aendereStandardPersonen(-1));
+  standardMehr.addEventListener('click', () => aendereStandardPersonen(1));
+  zeigeStandardPersonen();
 
   function allesAnzeigen() {
     zeigeRezepte();
