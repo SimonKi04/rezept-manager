@@ -1,0 +1,385 @@
+/* ===== Farben und Grundwerte ===== */
+:root {
+  --hintergrund: #f8f1e7;
+  --flaeche: #fffaf3;
+  --text: #3a2c25;
+  --text-leise: #7a6559;
+  --akzent: #b5532f;
+  --akzent-dunkel: #8f3e21;
+  --akzent-hell: #f6dccd;
+  --gruen: #5f7a3a;
+  --gruen-hell: #e4ebd5;
+  --claude: #7a4fa3;
+  --claude-hell: #efe6f7;
+  --linie: #e8dccd;
+  --schatten: 0 2px 10px rgba(80, 45, 20, 0.08);
+  --radius: 18px;
+  --reiter-hoehe: 64px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--hintergrund);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  padding-bottom: calc(var(--reiter-hoehe) + env(safe-area-inset-bottom) + 24px);
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+
+h1, h2, h3 { line-height: 1.25; }
+
+/* ===== Kopfzeile ===== */
+.kopf {
+  padding: calc(16px + env(safe-area-inset-top)) 16px 8px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.kopf h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--akzent-dunkel);
+  letter-spacing: -0.01em;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.einleitung { margin: 0 0 16px; color: var(--text-leise); }
+
+.leer {
+  text-align: center;
+  color: var(--text-leise);
+  padding: 48px 16px;
+}
+
+/* ===== Knöpfe ===== */
+.knopf {
+  min-height: 48px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-weight: 600;
+  flex: 1 1 auto;
+}
+.knopf-haupt { background: var(--akzent); color: #fff; }
+.knopf-haupt:active { background: var(--akzent-dunkel); }
+.knopf-aktiv { background: var(--gruen-hell); color: var(--gruen); border-color: var(--gruen); }
+.knopf-leise { background: transparent; color: var(--akzent-dunkel); border-color: var(--linie); }
+.knopf-gefahr {
+  display: block;
+  width: 100%;
+  margin: 24px 0 8px;
+  background: var(--flaeche);
+  color: var(--akzent-dunkel);
+  border-color: var(--akzent);
+}
+
+.rund {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--linie);
+  background: var(--flaeche);
+  font-size: 1.4rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.rund:disabled { opacity: 0.35; cursor: default; }
+
+:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }
+
+/* ===== Rezeptkarten ===== */
+.karten {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.karte {
+  background: var(--flaeche);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  overflow: hidden;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+}
+.karte.ausgewaehlt { border-color: var(--gruen); }
+
+.karte-bild {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: var(--akzent-hell);
+  aspect-ratio: 16 / 10;
+  width: 100%;
+}
+.karte-bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.karte-inhalt {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.karte-inhalt h2 { margin: 0; font-size: 1.25rem; }
+.meta { margin: 0; color: var(--text-leise); font-size: 0.95rem; }
+
+.markierung {
+  margin: 0;
+  align-self: flex-start;
+  background: var(--claude-hell);
+  color: var(--claude);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.portionen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--hintergrund);
+  border-radius: 999px;
+  padding: 6px;
+}
+.portionen-zahl { font-size: 1.05rem; }
+
+.varianten {
+  display: flex;
+  gap: 6px;
+  background: var(--hintergrund);
+  border-radius: 999px;
+  padding: 4px;
+}
+.variante {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 600;
+  color: var(--text-leise);
+}
+.variante[aria-pressed="true"] {
+  background: var(--flaeche);
+  color: var(--akzent-dunkel);
+  box-shadow: var(--schatten);
+}
+
+/* ===== Einkaufsliste ===== */
+.bereich { margin-bottom: 20px; }
+.bereich h2 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--akzent-dunkel);
+  margin: 0 0 8px 4px;
+}
+.bereich ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--flaeche);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  overflow: hidden;
+}
+.bereich-vorrat h2 { color: var(--gruen); }
+.bereich-vorrat ul { background: var(--gruen-hell); }
+
+.posten + .posten { border-top: 1px solid var(--linie); }
+.posten label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 10px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.posten input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border: 2px solid var(--akzent);
+  border-radius: 8px;
+  background: #fff;
+  display: grid;
+  place-content: center;
+}
+.posten input::after {
+  content: "";
+  width: 14px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 0 3px 3px;
+  transform: translateY(-2px) rotate(-45deg);
+  opacity: 0;
+}
+.posten input:checked { background: var(--gruen); border-color: var(--gruen); }
+.posten input:checked::after { opacity: 1; }
+
+.posten-name { flex: 1; }
+.posten-menge {
+  color: var(--text-leise);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.posten.erledigt .posten-name,
+.posten.erledigt .posten-menge {
+  text-decoration: line-through;
+  color: var(--text-leise);
+  opacity: 0.7;
+}
+
+/* ===== Reiter unten ===== */
+.reiter {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(255, 250, 243, 0.96);
+  border-top: 1px solid var(--linie);
+  box-shadow: 0 -2px 12px rgba(80, 45, 20, 0.06);
+  z-index: 10;
+}
+.reiter button {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 600;
+  color: var(--text-leise);
+}
+.reiter button[aria-current="page"] {
+  background: var(--akzent);
+  color: #fff;
+}
+
+/* ===== Rezept-Detailansicht ===== */
+dialog {
+  padding: 0;
+  border: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  background: var(--flaeche);
+  color: var(--text);
+}
+dialog::backdrop { background: rgba(40, 25, 15, 0.5); }
+
+#dialog-inhalt {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+.dialog-kopf {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background: var(--flaeche);
+  border-bottom: 1px solid var(--linie);
+}
+.dialog-kopf h2 { margin: 0; font-size: 1.3rem; }
+
+.dialog-bild {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--akzent-hell);
+}
+
+.dialog-text { padding: 12px 16px; }
+.dialog-text h3 {
+  margin: 20px 0 8px;
+  font-size: 1.1rem;
+  color: var(--akzent-dunkel);
+}
+
+.zutaten { margin: 0; padding-left: 20px; }
+.zutaten li { margin: 4px 0; }
+.zutaten .menge { font-weight: 600; }
+.hinweis { color: var(--text-leise); font-size: 0.92rem; }
+
+.schritte { margin: 8px 0 0; padding-left: 24px; }
+.schritte li { margin-bottom: 14px; }
+.schritte p { margin: 2px 0 0; }
+
+.etikett {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--akzent-hell);
+  color: var(--akzent-dunkel);
+  margin: 0 4px 4px 0;
+}
+.etikett-claude { background: var(--claude-hell); color: var(--claude); }
+
+/* ===== Größere Bildschirme (Tablet / PC) ===== */
+@media (min-width: 640px) {
+  .karten { grid-template-columns: repeat(2, 1fr); }
+  #ansicht-liste { max-width: 640px; margin: 0 auto; }
+  .reiter { justify-content: center; }
+  .reiter button { flex: 0 1 220px; }
+
+  dialog {
+    width: min(680px, 92vw);
+    height: auto;
+    max-height: 90vh;
+    margin: auto;
+    border-radius: var(--radius);
+  }
+  #dialog-inhalt { height: auto; max-height: 90vh; }
+}
+
+@media (min-width: 1000px) {
+  .karten { grid-template-columns: repeat(3, 1fr); }
+}

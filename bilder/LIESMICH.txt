@@ -1,0 +1,19 @@
+EIGENE FOTOS EINFÜGEN
+=====================
+
+Lege dein Foto in diesen Ordner und benenne es genau wie die "id" des Rezepts
+in rezepte.js, mit der Endung .jpg:
+
+  Pasta Limone                  ->  pasta-limone.jpg
+  Scharfe Asia-Nudeln (veggie)  ->  asia-nudeln.jpg
+  Katsu-Style Tofu              ->  katsu-tofu.jpg
+  Hühnchen-Spieße               ->  huehnchen-spiesse.jpg
+  Garnelen-Nudeln mit Tomaten   ->  garnelen-nudeln.jpg
+
+Regeln:
+- Alles kleingeschrieben, auch die Endung (.jpg, nicht .JPG oder .jpeg).
+  Am PC fällt ein Fehler nicht auf, auf GitHub Pages wird das Bild dann aber nicht gefunden.
+- Querformat sieht am besten aus. Ideal ist etwa 1200 x 750 Pixel und unter 500 KB,
+  damit die Seite am Handy schnell lädt.
+- Solange kein Foto da ist, zeigt die App automatisch platzhalter.svg.
+  Diese Datei bitte nicht löschen.

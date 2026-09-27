@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Bittet Suchmaschinen, die Seite nicht aufzunehmen -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#b5532f">
+  <title>Rezepte &amp; Einkauf</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="kopf">
+    <h1>Rezepte &amp; Einkauf</h1>
+  </header>
+
+  <main>
+    <section id="ansicht-rezepte" class="ansicht">
+      <p class="einleitung">Wähle Rezepte aus und stelle die Portionen ein.</p>
+      <div id="rezept-liste" class="karten"></div>
+    </section>
+
+    <section id="ansicht-liste" class="ansicht" hidden>
+      <div id="einkaufsliste"></div>
+      <button id="zuruecksetzen" class="knopf knopf-gefahr" type="button">Liste zurücksetzen</button>
+    </section>
+  </main>
+
+  <nav class="reiter" aria-label="Ansicht wechseln">
+    <button type="button" data-ansicht="rezepte" aria-current="page">Rezepte</button>
+    <button type="button" data-ansicht="liste">Einkaufsliste</button>
+  </nav>
+
+  <dialog id="rezept-dialog" aria-label="Rezept">
+    <div id="dialog-inhalt"></div>
+  </dialog>
+
+  <script src="rezepte.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
