@@ -345,6 +345,18 @@
     return `<p class="kennzahlen">${zeilen.join('')}</p>`;
   }
 
+  function makrosHtml(werte) {
+    if (!werte) return '';
+    const wert = (icon, kurz, lang, gramm) => `
+      <li title="${lang}"><span class="makro-icon" aria-hidden="true">${icon}</span>
+        <strong>${zahl(gramm || 0, 0)} g</strong><small><abbr title="${lang}">${kurz}</abbr></small></li>`;
+    return `<ul class="makros" aria-label="Nährwerte pro Portion">
+      ${wert('💪', 'P', 'Protein', werte.protein_g)}
+      ${wert('🥑', 'F', 'Fett', werte.fett_g)}
+      ${wert('🍞', 'KH', 'Kohlenhydrate', werte.kohlenhydrate_g)}
+    </ul>`;
+  }
+
   function noteKnopfHtml(rezept, bewertung) {
     if (!bewertung) return '';
     const offen = offeneNoten.has(rezept.id);
@@ -399,6 +411,7 @@
             </div>
             ${bewertung && offeneNoten.has(rezept.id) ? aufschluesselungHtml(bewertung) : ''}
             ${kennzahlenHtml(rezept, werte)}
+            ${makrosHtml(werte)}
             ${rezept.werte_geschaetzt ? `<p class="geschaetzt">Zeiten und Nährwerte geschätzt${
               werte && werte.variante ? ' · Nährwerte für „' + esc(werte.variante) + '“' : ''}</p>` : ''}
             <p class="meta">Grundrezept für ${rezept.portionen} Portionen</p>
